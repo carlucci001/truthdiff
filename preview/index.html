@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="TruthDiff turns code changes into evidence-backed documentation impact." />
+    <title>TruthDiff — Evidence-backed impact graph</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="TruthDiff home">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>
+            <strong>TruthDiff</strong>
+            <small>Evidence-backed impact intelligence</small>
+          </span>
+        </a>
+        <div class="status-cluster">
+          <span class="status-dot"></span><span>LOCAL</span>
+          <span class="divider"></span><span>EVIDENCE FIRST</span>
+        </div>
+      </header>
+
+      <section class="hero">
+        <div>
+          <p class="eyebrow">CODE → DOCUMENTATION → CONSEQUENCE</p>
+          <h1>Your graph should tell you<br /><em>what needs attention.</em></h1>
+          <p class="hero-copy">
+            TruthDiff converts a Git diff into a living impact graph. Red means
+            proven contradiction. Amber means review with evidence. Everything else
+            stays out of your way.
+          </p>
+        </div>
+        <div class="principle-card">
+          <span class="principle-kicker">OPERATING PRINCIPLE</span>
+          <strong>Similarity proposes.<br />Evidence decides.</strong>
+          <p>No cloud, no account, no paid model. Your files remain local.</p>
+        </div>
+      </section>
+
+      <section class="control-panel" aria-labelledby="analyze-title">
+        <div class="control-heading">
+          <div>
+            <span class="section-number">01</span>
+            <div>
+              <h2 id="analyze-title">Analyze a local change</h2>
+              <p>Point TruthDiff at a Git repository and its Markdown knowledge base.</p>
+            </div>
+          </div>
+          <button class="ghost-button" id="demoButton" type="button">
+            <span aria-hidden="true">✦</span> Reload safe demo
+          </button>
+        </div>
+
+        <form id="analyzeForm">
+          <label>
+            <span>GIT REPOSITORY</span>
+            <input id="repoInput" name="repo" placeholder="C:\dev\your-project" autocomplete="off" />
+          </label>
+          <label>
+            <span>MARKDOWN FOLDER</span>
+            <input id="docsInput" name="docs" placeholder="C:\dev\your-project\docs" autocomplete="off" />
+          </label>
+          <label>
+            <span>DIFF RANGE</span>
+            <select id="rangeInput" name="range">
+              <option value="working">Working tree</option>
+              <option value="HEAD~1..HEAD">Last commit</option>
+              <option value="main..HEAD">Main → HEAD</option>
+            </select>
+          </label>
+          <button class="primary-button" id="analyzeButton" type="submit">
+            <span>Run TruthDiff</span><b aria-hidden="true">→</b>
+          </button>
+        </form>
+        <p id="formMessage" class="form-message" role="status"></p>
+      </section>
+
+      <section class="summary-strip" aria-label="Impact summary">
+        <article>
+          <span>CHANGED FILES</span><strong id="changedCount">—</strong><small>source nodes</small>
+        </article>
+        <article class="critical">
+          <span>CONTRADICTED</span><strong id="contradictedCount">—</strong><small>proof-backed red</small>
+        </article>
+        <article class="review">
+          <span>REVIEW</span><strong id="reviewCount">—</strong><small>evidence-backed amber</small>
+        </article>
+        <article>
+          <span>AFFECTED DOCS</span><strong id="affectedCount">—</strong><small>not graph noise</small>
+        </article>
+      </section>
+
+      <section class="workspace">
+        <div class="graph-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="section-number">02</span>
+              <div>
+                <h2>Impact graph</h2>
+                <p>Move through consequences, not a decorative constellation.</p>
+              </div>
+            </div>
+            <div class="legend" aria-label="Graph legend">
+              <span><i class="source"></i>Changed source</span>
+              <span><i class="contradicted"></i>Contradicted</span>
+              <span><i class="review"></i>Review</span>
+            </div>
+          </div>
+          <div class="canvas-wrap">
+            <canvas id="graphCanvas" aria-label="Interactive TruthDiff impact graph"></canvas>
+            <div class="graph-hint">Select a node to inspect its evidence</div>
+          </div>
+        </div>
+
+        <aside class="evidence-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="section-number">03</span>
+              <div>
+                <h2>Evidence inspector</h2>
+                <p>The reason behind every alert.</p>
+              </div>
+            </div>
+          </div>
+          <div id="evidenceEmpty" class="evidence-empty">
+            <span>◎</span><p>Select a finding in the graph.</p>
+          </div>
+          <article id="evidenceDetail" class="evidence-detail" hidden>
+            <div class="finding-state" id="findingState">CONTRADICTED</div>
+            <h3 id="findingTitle"></h3>
+            <p class="finding-path" id="findingPath"></p>
+            <div class="proof-block">
+              <span>WHY IT WAS FLAGGED</span><p id="findingReason"></p>
+            </div>
+            <dl>
+              <div><dt>Signal</dt><dd id="findingSignal"></dd></div>
+              <div><dt>Changed source</dt><dd id="findingSource"></dd></div>
+              <div><dt>Evidence</dt><dd id="findingEvidence"></dd></div>
+            </dl>
+          </article>
+          <div class="finding-list-wrap">
+            <div class="list-label"><span>FINDINGS</span><span id="findingTotal">0</span></div>
+            <div id="findingList" class="finding-list"></div>
+          </div>
+        </aside>
+      </section>
+
+      <footer>
+        <span>TRUTHDIFF / LOCAL PREVIEW</span>
+        <span>Nothing leaves this machine.</span>
+      </footer>
+    </main>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

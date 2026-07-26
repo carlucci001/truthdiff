@@ -1,0 +1,8 @@
+export { analyzeImpact, identifierKey } from './analyze.js'
+export { IMPACT_STATES, createFinding } from './contracts.js'
+export { extractDocumentLinks, loadMarkdownDocuments, normalizeDocument } from './documents.js'
+export { createDemoGraph } from './demo.js'
+export { formatMarkdownReport } from './format.js'
+export { extractIdentifiers } from './identifiers.js'
+export { parseGitDiff, readGitChangeSet } from './git.js'
+export { buildIdentifierStatus, removedVerifiableIdentifiers } from './source-index.js'

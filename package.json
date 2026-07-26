@@ -1,0 +1,35 @@
+{
+  "name": "truthdiff",
+  "version": "0.1.0",
+  "description": "Evidence-first knowledge impact analysis for Git changes.",
+  "type": "module",
+  "bin": {
+    "truthdiff": "./bin/truthdiff.js"
+  },
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "bin",
+    "preview",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "check": "node ./bin/truthdiff.js --help",
+    "benchmark": "node ./benchmark/run.js",
+    "preview": "node ./preview/server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "documentation",
+    "git",
+    "knowledge-graph",
+    "developer-tools",
+    "ai-agents"
+  ],
+  "license": "AGPL-3.0-only"
+}
