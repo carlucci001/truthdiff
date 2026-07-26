@@ -2,6 +2,15 @@
   "name": "truthdiff",
   "version": "0.1.0",
   "description": "Evidence-first knowledge impact analysis for Git changes.",
+  "author": "Farrington Development",
+  "homepage": "https://github.com/carlucci001/truthdiff#readme",
+  "bugs": {
+    "url": "https://github.com/carlucci001/truthdiff/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/carlucci001/truthdiff.git"
+  },
   "type": "module",
   "bin": {
     "truthdiff": "./bin/truthdiff.js"

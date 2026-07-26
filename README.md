@@ -1,5 +1,9 @@
 # TruthDiff
 
+[![CI](https://github.com/carlucci001/truthdiff/actions/workflows/ci.yml/badge.svg)](https://github.com/carlucci001/truthdiff/actions/workflows/ci.yml)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
+[![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-339933.svg)](https://nodejs.org/)
+
 TruthDiff is a local-first, evidence-first engine that maps Git changes to the
 documentation and operational knowledge they may invalidate.
 
@@ -98,8 +102,12 @@ TruthDiff does not upload repositories, require an account, or call a paid API.
 
 ## Status
 
-TruthDiff is at `0.1.0` and intended for local evaluation before any public
-release. The API contract is versioned but may evolve before `1.0`.
+TruthDiff is an alpha project at `0.1.0`. The API contract is versioned but may
+evolve before `1.0`. Bug reports, evidence-policy test cases, and focused pull
+requests are welcome.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidance and
+[SECURITY.md](SECURITY.md) for private vulnerability reporting.
 
 ## License
 
