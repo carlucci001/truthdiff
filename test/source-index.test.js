@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, rm, symlink, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -54,4 +54,45 @@ test('selects only removed identifiers eligible for deterministic verification',
     '/api/removed',
     'REMOVED_KEY',
   ]);
+});
+
+test('ignores source symlink files and directories outside the repository', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'truthdiff-source-root-'));
+  const outside = await mkdtemp(path.join(os.tmpdir(), 'truthdiff-source-outside-'));
+  try {
+    await mkdir(path.join(root, 'src'));
+    await writeFile(path.join(root, 'src', 'safe.js'), 'export const safe = true;\n');
+    await writeFile(path.join(outside, 'external.js'), "export const route = '/api/external-only';\n");
+    try {
+      await symlink(path.join(outside, 'external.js'), path.join(root, 'src', 'linked.js'), 'file');
+      await symlink(outside, path.join(root, 'linked-directory'), process.platform === 'win32' ? 'junction' : 'dir');
+    } catch (error) {
+      if (error.code === 'EPERM') return t.skip('File symlinks require elevated permission on this Windows host');
+      throw error;
+    }
+
+    const key = identifierKey({ kind: 'route', value: '/api/external-only' });
+    const status = await buildIdentifierStatus(root, [
+      { kind: 'route', value: '/api/external-only' },
+    ]);
+    assert.equal(status[key], 'absent');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+    await rm(outside, { recursive: true, force: true });
+  }
+});
+
+test('enforces source file scan budgets', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'truthdiff-source-limit-'));
+  try {
+    await writeFile(path.join(root, 'large.js'), 'export const value = true;\n');
+    await assert.rejects(
+      buildIdentifierStatus(root, [{ kind: 'config', value: 'MISSING_KEY' }], {
+        maxFileBytes: 4,
+      }),
+      /scan limit/,
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });

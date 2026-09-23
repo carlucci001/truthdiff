@@ -6,10 +6,10 @@ import { createDemoGraph } from '../src/demo.js'
 test('preview demo includes proof, review, and unrelated-document controls', () => {
   const graph = createDemoGraph()
 
-  assert.equal(graph.summary.changedFiles, 3)
-  assert.equal(graph.summary.counts.contradicted, 1)
-  assert.equal(graph.summary.counts.review, 3)
-  assert.equal(graph.summary.affectedDocuments, 3)
+  assert.equal(graph.summary.changedFiles, 5)
+  assert.equal(graph.summary.counts.contradicted, 3)
+  assert.equal(graph.summary.counts.review, 5)
+  assert.equal(graph.summary.affectedDocuments, 6)
   assert.equal(
     graph.findings.find(finding => finding.state === 'contradicted').deterministic,
     true,

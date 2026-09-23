@@ -10,6 +10,28 @@ const COMMON_UPPERCASE = new Set([
   'URL',
 ])
 
+const COMMON_SYMBOLS = new Set([
+  'args',
+  'data',
+  'error',
+  'event',
+  'files',
+  'graph',
+  'hit',
+  'item',
+  'items',
+  'options',
+  'props',
+  'request',
+  'response',
+  'result',
+  'results',
+  'source',
+  'state',
+  'value',
+  'values',
+])
+
 function unique(items) {
   const seen = new Set()
   return items.filter(item => {
@@ -18,6 +40,12 @@ function unique(items) {
     seen.add(key)
     return true
   })
+}
+
+export function isMeaningfulIdentifier(identifier) {
+  if (identifier?.kind !== 'symbol') return true
+  const value = String(identifier.value || '')
+  return value.length > 1 && !COMMON_SYMBOLS.has(value.toLowerCase())
 }
 
 export function extractIdentifiers(text) {
@@ -35,9 +63,9 @@ export function extractIdentifiers(text) {
   }
 
   for (const match of source.matchAll(/\b(?:function|class)\s+([A-Za-z_$][\w$]*)|\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=/g)) {
-    identifiers.push({ kind: 'symbol', value: match[1] || match[2] })
+    const identifier = { kind: 'symbol', value: match[1] || match[2] }
+    if (isMeaningfulIdentifier(identifier)) identifiers.push(identifier)
   }
 
   return unique(identifiers)
 }
-

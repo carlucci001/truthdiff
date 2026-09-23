@@ -3,13 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="TruthDiff turns code changes into evidence-backed documentation impact." />
-    <title>TruthDiff — Evidence-backed impact graph</title>
+    <meta
+      name="description"
+      content="TruthDiff checks code changes against Markdown documentation and explains what may be out of date."
+    />
+    <title>TruthDiff — Check code changes against documentation</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <div class="ambient ambient-one"></div>
-    <div class="ambient ambient-two"></div>
+    <a class="skip-link" href="#setup">Skip to scan setup</a>
 
     <main class="app-shell">
       <header class="topbar">
@@ -17,143 +19,234 @@
           <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
           <span>
             <strong>TruthDiff</strong>
-            <small>Evidence-backed impact intelligence</small>
+            <small>Documentation change checks</small>
           </span>
         </a>
-        <div class="status-cluster">
-          <span class="status-dot"></span><span>LOCAL</span>
-          <span class="divider"></span><span>EVIDENCE FIRST</span>
+        <div class="status-cluster" aria-label="Preview status">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span>PREVIEW RUNNING</span>
         </div>
       </header>
 
-      <section class="hero">
-        <div>
-          <p class="eyebrow">CODE → DOCUMENTATION → CONSEQUENCE</p>
-          <h1>Your graph should tell you<br /><em>what needs attention.</em></h1>
-          <p class="hero-copy">
-            TruthDiff converts a Git diff into a living impact graph. Red means
-            proven contradiction. Amber means review with evidence. Everything else
-            stays out of your way.
+      <section class="intro" aria-labelledby="pageTitle">
+        <div class="intro-copy">
+          <p class="eyebrow">CODE CHANGES, CHECKED AGAINST YOUR DOCS</p>
+          <h1 id="pageTitle">Find documentation that no longer matches the code.</h1>
+          <p>
+            Choose a Git source and tell TruthDiff where its Markdown documentation lives.
+            It reads the code change, checks the related docs, and shows the evidence behind
+            anything that needs attention.
           </p>
         </div>
-        <div class="principle-card">
-          <span class="principle-kicker">OPERATING PRINCIPLE</span>
-          <strong>Similarity proposes.<br />Evidence decides.</strong>
-          <p>No cloud, no account, no paid model. Your files remain local.</p>
-        </div>
+        <ol class="process" aria-label="How TruthDiff works">
+          <li><strong>1</strong><span><b>Choose code</b><small>Local checkout or public GitHub URL</small></span></li>
+          <li><strong>2</strong><span><b>Point to docs</b><small>A folder of Markdown files</small></span></li>
+          <li><strong>3</strong><span><b>Review the verdict</b><small>Proof in red, review signals in amber</small></span></li>
+        </ol>
       </section>
 
-      <section class="control-panel" aria-labelledby="analyze-title">
-        <div class="control-heading">
-          <div>
-            <span class="section-number">01</span>
+      <div class="primary-grid">
+        <section class="setup-panel" id="setup" aria-labelledby="setupTitle">
+          <div class="section-heading">
             <div>
-              <h2 id="analyze-title">Analyze a local change</h2>
-              <p>Point TruthDiff at a Git repository and its Markdown knowledge base.</p>
-            </div>
-          </div>
-          <button class="ghost-button" id="demoButton" type="button">
-            <span aria-hidden="true">✦</span> Reload safe demo
-          </button>
-        </div>
-
-        <form id="analyzeForm">
-          <label>
-            <span>GIT REPOSITORY</span>
-            <input id="repoInput" name="repo" placeholder="C:\dev\your-project" autocomplete="off" />
-          </label>
-          <label>
-            <span>MARKDOWN FOLDER</span>
-            <input id="docsInput" name="docs" placeholder="C:\dev\your-project\docs" autocomplete="off" />
-          </label>
-          <label>
-            <span>DIFF RANGE</span>
-            <select id="rangeInput" name="range">
-              <option value="working">Working tree</option>
-              <option value="HEAD~1..HEAD">Last commit</option>
-              <option value="main..HEAD">Main → HEAD</option>
-            </select>
-          </label>
-          <button class="primary-button" id="analyzeButton" type="submit">
-            <span>Run TruthDiff</span><b aria-hidden="true">→</b>
-          </button>
-        </form>
-        <p id="formMessage" class="form-message" role="status"></p>
-      </section>
-
-      <section class="summary-strip" aria-label="Impact summary">
-        <article>
-          <span>CHANGED FILES</span><strong id="changedCount">—</strong><small>source nodes</small>
-        </article>
-        <article class="critical">
-          <span>CONTRADICTED</span><strong id="contradictedCount">—</strong><small>proof-backed red</small>
-        </article>
-        <article class="review">
-          <span>REVIEW</span><strong id="reviewCount">—</strong><small>evidence-backed amber</small>
-        </article>
-        <article>
-          <span>AFFECTED DOCS</span><strong id="affectedCount">—</strong><small>not graph noise</small>
-        </article>
-      </section>
-
-      <section class="workspace">
-        <div class="graph-panel">
-          <div class="panel-heading">
-            <div>
-              <span class="section-number">02</span>
+              <span class="section-number">01</span>
               <div>
-                <h2>Impact graph</h2>
-                <p>Move through consequences, not a decorative constellation.</p>
+                <h2 id="setupTitle">Set up a scan</h2>
+                <p>TruthDiff compares a Git change with documentation. It does not compare two folders.</p>
               </div>
             </div>
-            <div class="legend" aria-label="Graph legend">
-              <span><i class="source"></i>Changed source</span>
-              <span><i class="contradicted"></i>Contradicted</span>
-              <span><i class="review"></i>Review</span>
-            </div>
+            <button class="text-button" id="demoButton" type="button">View example result</button>
           </div>
-          <div class="canvas-wrap">
-            <canvas id="graphCanvas" aria-label="Interactive TruthDiff impact graph"></canvas>
-            <div class="graph-hint">Select a node to inspect its evidence</div>
-          </div>
-        </div>
 
-        <aside class="evidence-panel">
-          <div class="panel-heading">
-            <div>
-              <span class="section-number">03</span>
-              <div>
-                <h2>Evidence inspector</h2>
-                <p>The reason behind every alert.</p>
+          <form id="analyzeForm" aria-describedby="formMessage">
+            <fieldset class="source-switcher">
+              <legend>Where is the code?</legend>
+              <div class="segmented-control">
+                <label>
+                  <input type="radio" name="sourceMode" value="local" checked />
+                  <span><b>Local checkout</b><small>A Git repository on this computer</small></span>
+                </label>
+                <label>
+                  <input type="radio" name="sourceMode" value="github" />
+                  <span><b>Public GitHub URL</b><small>A public repository TruthDiff can read</small></span>
+                </label>
               </div>
+            </fieldset>
+
+            <div class="form-grid">
+              <div class="field">
+                <label id="repoLabel" for="repoInput">Local Git repository</label>
+                <input
+                  id="repoInput"
+                  name="repo"
+                  placeholder="C:\dev\your-project"
+                  autocomplete="off"
+                  spellcheck="false"
+                  required
+                  aria-describedby="repoHelp"
+                />
+                <small id="repoHelp">Use the full path to a checked-out Git repository.</small>
+              </div>
+
+              <div class="field">
+                <label id="docsLabel" for="docsInput">Markdown documentation folder</label>
+                <input
+                  id="docsInput"
+                  name="docs"
+                  placeholder="C:\dev\your-project\docs"
+                  autocomplete="off"
+                  spellcheck="false"
+                  required
+                  aria-describedby="docsHelp"
+                />
+                <small id="docsHelp">Use the full path to the folder containing .md files.</small>
+              </div>
+
+              <div class="field">
+                <label for="rangeInput">Which code change?</label>
+                <select id="rangeInput" name="range" aria-describedby="rangeHelp">
+                  <option value="working">Uncommitted work</option>
+                  <option value="HEAD~1..HEAD">Most recent commit</option>
+                  <option value="main..HEAD">Current branch since main</option>
+                </select>
+                <small id="rangeHelp">Checks local edits that have not been committed yet.</small>
+              </div>
+
+              <button class="primary-button" id="analyzeButton" type="submit">
+                <span>Check documentation</span><b aria-hidden="true">→</b>
+              </button>
             </div>
-          </div>
-          <div id="evidenceEmpty" class="evidence-empty">
-            <span>◎</span><p>Select a finding in the graph.</p>
-          </div>
-          <article id="evidenceDetail" class="evidence-detail" hidden>
-            <div class="finding-state" id="findingState">CONTRADICTED</div>
-            <h3 id="findingTitle"></h3>
-            <p class="finding-path" id="findingPath"></p>
-            <div class="proof-block">
-              <span>WHY IT WAS FLAGGED</span><p id="findingReason"></p>
+            <p id="formMessage" class="form-message" role="status" aria-live="polite"></p>
+          </form>
+        </section>
+
+        <aside class="runs-panel" id="runsPanel" aria-labelledby="runsTitle" aria-busy="false">
+          <div class="runs-heading">
+            <div>
+              <span class="section-number">HISTORY</span>
+              <h2 id="runsTitle">Recent scans</h2>
             </div>
-            <dl>
-              <div><dt>Signal</dt><dd id="findingSignal"></dd></div>
-              <div><dt>Changed source</dt><dd id="findingSource"></dd></div>
-              <div><dt>Evidence</dt><dd id="findingEvidence"></dd></div>
-            </dl>
-          </article>
-          <div class="finding-list-wrap">
-            <div class="list-label"><span>FINDINGS</span><span id="findingTotal">0</span></div>
-            <div id="findingList" class="finding-list"></div>
+            <button id="refreshRunsButton" class="icon-button" type="button" aria-label="Refresh recent scans">↻</button>
           </div>
+          <div id="runsLoading" class="runs-loading" aria-label="Loading recent scans" aria-busy="true">
+            <span></span><span></span><span></span>
+          </div>
+          <p id="runsMessage" class="runs-message" role="status"></p>
+          <div id="runsList" class="runs-list" aria-busy="false"></div>
         </aside>
+      </div>
+
+      <section class="results-panel" id="resultsPanel" aria-labelledby="resultsTitle" aria-live="polite">
+        <div class="results-heading">
+          <div>
+            <span class="section-number">02</span>
+            <div>
+              <h2 id="resultsTitle">Scan result</h2>
+              <p id="resultsContext">Built-in example</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="verdict-card" id="verdictCard">
+          <span class="verdict-symbol" id="verdictSymbol" aria-hidden="true">—</span>
+          <div>
+            <p class="verdict-kicker" id="verdictKicker">READY</p>
+            <h3 id="verdictTitle">Run a scan to check your documentation.</h3>
+            <p id="verdictText">TruthDiff will explain whether it found proof of a mismatch or only something worth reviewing.</p>
+          </div>
+        </div>
+
+        <div class="meaning-grid" aria-label="How to read results">
+          <article class="meaning critical">
+            <span aria-hidden="true">!</span>
+            <div><strong>Red means proven mismatch</strong><p>Deterministic evidence shows the documentation contradicts the changed code.</p></div>
+          </article>
+          <article class="meaning review">
+            <span aria-hidden="true">?</span>
+            <div><strong>Amber means review suggested</strong><p>The code and document appear related, but TruthDiff does not claim the doc is wrong.</p></div>
+          </article>
+        </div>
+
+        <section class="summary-strip" aria-label="Scan counts">
+          <article><span>Changed files</span><strong id="changedCount">—</strong></article>
+          <article class="critical"><span>Proven mismatches</span><strong id="contradictedCount">—</strong></article>
+          <article class="review"><span>Suggested reviews</span><strong id="reviewCount">—</strong></article>
+          <article><span>Affected docs</span><strong id="affectedCount">—</strong></article>
+        </section>
+
+        <div class="review-workspace">
+          <section class="findings-panel" aria-labelledby="findingsTitle">
+            <div class="panel-heading compact">
+              <div>
+                <span class="section-number">FINDINGS</span>
+                <h3 id="findingsTitle">Documents to inspect <span id="findingTotal">0</span></h3>
+              </div>
+            </div>
+            <div id="findingsEmpty" class="panel-empty">
+              <strong>No findings to show</strong>
+              <p>Run a scan or open an example result.</p>
+            </div>
+            <div id="findingList" class="finding-list"></div>
+          </section>
+
+          <aside class="evidence-panel" aria-labelledby="evidenceTitle">
+            <div class="panel-heading compact">
+              <div>
+                <span class="section-number">EVIDENCE</span>
+                <h3 id="evidenceTitle">Why it was flagged</h3>
+              </div>
+            </div>
+            <div id="evidenceEmpty" class="panel-empty">
+              <strong>Select a finding</strong><p>Choose a document to see the code connection and evidence.</p>
+            </div>
+            <article id="evidenceDetail" class="evidence-detail" hidden>
+              <div class="finding-state" id="findingState">PROVEN MISMATCH</div>
+              <h3 id="findingTitle"></h3>
+              <p class="finding-path" id="findingPath"></p>
+              <div class="proof-block">
+                <span>WHY IT WAS FLAGGED</span><p id="findingReason"></p>
+              </div>
+              <dl>
+                <div><dt>Signal</dt><dd id="findingSignal"></dd></div>
+                <div><dt>Changed source</dt><dd id="findingSource"></dd></div>
+                <div><dt>Evidence</dt><dd id="findingEvidence"></dd></div>
+              </dl>
+              <section class="annotation-card" aria-labelledby="annotationLabel">
+                <label id="annotationLabel" for="annotationInput">Private note for this browser</label>
+                <textarea id="annotationInput" rows="3" placeholder="Add a note about this finding"></textarea>
+                <div class="annotation-actions">
+                  <span id="annotationStatus" role="status">Not saved</span>
+                  <button id="saveAnnotationButton" type="button">Save note</button>
+                </div>
+              </section>
+            </article>
+          </aside>
+        </div>
+
+        <details class="graph-disclosure" open>
+          <summary>
+            <span><strong>Impact map</strong><small>Optional visual of changed files connected to documents</small></span>
+            <span aria-hidden="true">⌄</span>
+          </summary>
+          <div class="graph-panel">
+            <div class="graph-toolbar">
+              <div class="legend" aria-label="Impact map legend">
+                <span><i class="source"></i>Changed source</span>
+                <span><i class="contradicted"></i>Proven mismatch</span>
+                <span><i class="review"></i>Suggested review</span>
+              </div>
+            </div>
+            <div class="canvas-wrap">
+              <canvas id="graphCanvas" aria-label="Impact map. Use the findings list above for keyboard navigation."></canvas>
+              <button id="quickAnnotateButton" class="graph-hint" type="button" disabled>Select a document to annotate</button>
+            </div>
+          </div>
+        </details>
       </section>
 
       <footer>
-        <span>TRUTHDIFF / LOCAL PREVIEW</span>
-        <span>Nothing leaves this machine.</span>
+        <span>TRUTHDIFF / MVP PREVIEW</span>
+        <span>Local mode reads local files. GitHub mode accepts public repositories.</span>
       </footer>
     </main>
     <script type="module" src="/app.js"></script>

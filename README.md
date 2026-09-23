@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.png" width="340" alt="TruthDiff — an Octi open source project">
+</p>
+
 # TruthDiff
 
 [![CI](https://github.com/carlucci001/truthdiff/actions/workflows/ci.yml/badge.svg)](https://github.com/carlucci001/truthdiff/actions/workflows/ci.yml)
@@ -15,6 +19,7 @@ graphs do not: **what knowledge became risky because the code changed?**
 - An installable Node.js CLI (`truthdiff`)
 - A zero-runtime-dependency JavaScript library
 - A loopback-only animated preview with a built-in safe demo
+- A guided local-checkout or public-GitHub scan flow with bounded recent history
 - A versioned graph and findings contract for product integrations
 - Deterministic red findings for provable contradictions
 - Review-only semantic candidate support for vector indexes and AI systems
@@ -43,9 +48,20 @@ npm run preview
 ```
 
 Then open `http://127.0.0.1:4177`. The preview binds only to the loopback
-interface, keeps repository paths and document content on the machine, and
-loads a synthetic demo by default. Enter a local Git repository and Markdown
-folder to replace the demo with a live working-tree analysis.
+interface and loads a synthetic demo by default. It supports two MVP source
+modes:
+
+- **Local checkout:** enter the full paths to a local Git repository and a
+  Markdown folder. The folder may live inside or outside the repository.
+- **Public GitHub repository:** enter an exact
+  `https://github.com/OWNER/REPOSITORY` URL and a repository-relative Markdown
+  folder such as `docs`. TruthDiff creates a bounded temporary checkout,
+  compares the latest two commits, and removes the checkout after the scan.
+
+Private repositories, arbitrary Git hosts, credentials embedded in URLs, and
+GitHub subpage URLs are intentionally unsupported in this local MVP. Recent
+scan summaries are kept only in memory and reset when the preview process
+stops.
 
 ## Evidence policy
 
@@ -99,6 +115,8 @@ Vault `Impact` graph mode. Its existing FKL vector index supplies semantic
 candidates, while TruthDiff owns classification and evidence.
 
 TruthDiff does not upload repositories, require an account, or call a paid API.
+Public GitHub mode downloads a temporary read-only checkout directly from
+GitHub; local mode does not send repository or document content anywhere.
 
 ## Status
 

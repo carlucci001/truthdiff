@@ -47,6 +47,34 @@ test('keeps changed symbols and unknown identifiers in review', () => {
   assert.equal(graph.summary.counts.review, 1)
 })
 
+test('ignores noisy symbols while preserving meaningful symbol and route reviews', () => {
+  const graph = analyzeImpact({
+    changeSet: {
+      fingerprint: 'precision-fixture',
+      files: [{
+        path: 'src/tenant.js',
+        previousPath: 'src/tenant.js',
+        status: 'modified',
+        removedIdentifiers: [
+          { kind: 'symbol', value: 'i' },
+          { kind: 'symbol', value: 'resolveTenant' },
+          { kind: 'route', value: '/api/tenant/articles' },
+        ],
+      }],
+    },
+    documents: [normalizeDocument({
+      id: 'guides/tenant.md',
+      content: '# Tenant guide\n\nThis guide uses resolveTenant and /api/tenant/articles.',
+    })],
+  })
+
+  assert.equal(graph.summary.counts.review, 2)
+  assert.deepEqual(
+    graph.findings.map(finding => finding.evidence[0].value),
+    ['resolveTenant', '/api/tenant/articles'],
+  )
+})
+
 test('semantic candidates can only create review findings', () => {
   const graph = analyzeImpact({
     changeSet,

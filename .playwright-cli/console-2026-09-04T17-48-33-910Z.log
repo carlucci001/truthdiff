@@ -1,0 +1,1 @@
+[      59ms] [ERROR] Loading the stylesheet 'https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap' violates the following Content Security Policy directive: "style-src 'self'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked. @ http://127.0.0.1:4187/:0

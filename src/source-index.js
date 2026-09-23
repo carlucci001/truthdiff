@@ -1,4 +1,4 @@
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 
 import { identifierKey } from './analyze.js';
@@ -13,25 +13,45 @@ const DEFAULT_SOURCE_EXTENSIONS = new Set([
   '.mjs', '.php', '.py', '.rb', '.rs', '.scss', '.sql', '.svelte',
   '.toml', '.ts', '.tsx', '.vue', '.yaml', '.yml',
 ]);
+const DEFAULT_MAX_SOURCE_FILES = 20_000;
+const DEFAULT_MAX_SOURCE_FILE_BYTES = 2 * 1024 * 1024;
+const DEFAULT_MAX_SOURCE_BYTES = 100 * 1024 * 1024;
 
-async function walkSourceFiles(rootPath, options, relativePath = '') {
+async function walkSourceFiles(
+  rootPath,
+  options,
+  relativePath = '',
+  state = { bytes: 0, files: [] },
+) {
   const absolutePath = path.join(rootPath, relativePath);
   const entries = await readdir(absolutePath, { withFileTypes: true });
-  const files = [];
 
   for (const entry of entries) {
+    if (entry.isSymbolicLink()) continue;
     if (options.excludedDirectories.has(entry.name)) continue;
     const entryRelativePath = path.join(relativePath, entry.name);
     if (entry.isDirectory()) {
-      files.push(...await walkSourceFiles(rootPath, options, entryRelativePath));
+      await walkSourceFiles(rootPath, options, entryRelativePath, state);
       continue;
     }
     if (options.sourceExtensions.has(path.extname(entry.name).toLowerCase())) {
-      files.push(entryRelativePath);
+      const file = await stat(path.join(rootPath, entryRelativePath));
+      if (!file.isFile()) continue;
+      if (file.size > options.maxFileBytes) {
+        throw new Error(`Source file exceeds the ${options.maxFileBytes}-byte scan limit: ${entryRelativePath}`);
+      }
+      if (state.files.length >= options.maxFiles) {
+        throw new Error(`Repository exceeds the ${options.maxFiles}-source-file scan limit.`);
+      }
+      if (state.bytes + file.size > options.maxBytes) {
+        throw new Error(`Repository source exceeds the ${options.maxBytes}-byte scan limit.`);
+      }
+      state.bytes += file.size;
+      state.files.push(entryRelativePath);
     }
   }
 
-  return files;
+  return state.files;
 }
 
 export async function buildIdentifierStatus(repoPath, identifiers, options = {}) {
@@ -65,6 +85,9 @@ export async function buildIdentifierStatus(repoPath, identifiers, options = {})
     sourceExtensions: new Set(
       options.sourceExtensions || DEFAULT_SOURCE_EXTENSIONS,
     ),
+    maxFiles: Math.max(1, Number(options.maxFiles) || DEFAULT_MAX_SOURCE_FILES),
+    maxFileBytes: Math.max(1, Number(options.maxFileBytes) || DEFAULT_MAX_SOURCE_FILE_BYTES),
+    maxBytes: Math.max(1, Number(options.maxBytes) || DEFAULT_MAX_SOURCE_BYTES),
   };
   const files = await walkSourceFiles(path.resolve(repoPath), scanOptions);
   const unresolved = new Map(
