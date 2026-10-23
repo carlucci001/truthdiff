@@ -23,3 +23,22 @@ test('deduplicates identifiers and ignores common uppercase words', () => {
     { kind: 'config', value: 'CRM_DATA_DIR' },
   ])
 })
+
+test('ignores loop variables and generic prose-like symbols', () => {
+  const identifiers = extractIdentifiers(`
+    for (let i = 0; i < records.length; i += 1) {}
+    const data = loadRecords()
+    const result = transform(data)
+    const source = input
+    const graph = buildGraph()
+    const hit = matchDocument()
+    const files = entries
+    function resolveTenant() {}
+    fetch('/api/tenant/articles')
+  `)
+
+  assert.deepEqual(identifiers, [
+    { kind: 'route', value: '/api/tenant/articles' },
+    { kind: 'symbol', value: 'resolveTenant' },
+  ])
+})

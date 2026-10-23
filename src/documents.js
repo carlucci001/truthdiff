@@ -9,20 +9,39 @@ const SKIP_DIRS = new Set([
   'dist',
   'node_modules',
 ])
+const DEFAULT_MAX_DOCUMENTS = 2_000
+const DEFAULT_MAX_DOCUMENT_BYTES = 2 * 1024 * 1024
+const DEFAULT_MAX_TOTAL_BYTES = 20 * 1024 * 1024
 
 function normalizedRelative(root, filePath) {
   return path.relative(root, filePath).replace(/\\/g, '/')
 }
 
-function walkMarkdown(root, dir = root, output = []) {
+function walkMarkdown(root, limits, dir = root, state = { bytes: 0, files: [] }) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isSymbolicLink()) continue
     if (entry.name.startsWith('.') && entry.name !== '.claude') continue
     if (entry.isDirectory() && SKIP_DIRS.has(entry.name)) continue
     const fullPath = path.join(dir, entry.name)
-    if (entry.isDirectory()) walkMarkdown(root, fullPath, output)
-    else if (entry.name.toLowerCase().endsWith('.md')) output.push(fullPath)
+    if (entry.isDirectory()) {
+      walkMarkdown(root, limits, fullPath, state)
+    } else if (entry.name.toLowerCase().endsWith('.md')) {
+      const file = fs.statSync(fullPath)
+      if (!file.isFile()) continue
+      if (file.size > limits.maxFileBytes) {
+        throw new Error(`Markdown file exceeds the ${limits.maxFileBytes}-byte scan limit: ${normalizedRelative(root, fullPath)}`)
+      }
+      if (state.files.length >= limits.maxFiles) {
+        throw new Error(`Markdown folder exceeds the ${limits.maxFiles}-file scan limit.`)
+      }
+      if (state.bytes + file.size > limits.maxBytes) {
+        throw new Error(`Markdown folder exceeds the ${limits.maxBytes}-byte scan limit.`)
+      }
+      state.bytes += file.size
+      state.files.push(fullPath)
+    }
   }
-  return output
+  return state.files
 }
 
 export function extractDocumentLinks(content) {
@@ -60,10 +79,15 @@ export function normalizeDocument(input) {
   }
 }
 
-export function loadMarkdownDocuments(docsPath) {
+export function loadMarkdownDocuments(docsPath, options = {}) {
   const root = path.resolve(docsPath)
   if (!fs.existsSync(root)) throw new Error(`Markdown path does not exist: ${root}`)
-  return walkMarkdown(root).map(filePath => normalizeDocument({
+  const limits = {
+    maxFiles: Math.max(1, Number(options.maxFiles) || DEFAULT_MAX_DOCUMENTS),
+    maxFileBytes: Math.max(1, Number(options.maxFileBytes) || DEFAULT_MAX_DOCUMENT_BYTES),
+    maxBytes: Math.max(1, Number(options.maxBytes) || DEFAULT_MAX_TOTAL_BYTES),
+  }
+  return walkMarkdown(root, limits).map(filePath => normalizeDocument({
     id: normalizedRelative(root, filePath),
     path: filePath,
     content: fs.readFileSync(filePath, 'utf8'),

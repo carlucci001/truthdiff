@@ -1,6 +1,7 @@
 import crypto from 'node:crypto'
 import path from 'node:path'
 import { createFinding } from './contracts.js'
+import { isMeaningfulIdentifier } from './identifiers.js'
 
 const STATE_PRIORITY = {
   unsupported: 0,
@@ -60,6 +61,7 @@ export function analyzeImpact(options = {}) {
   for (const file of changeSet.files || []) {
     for (const document of documents) {
       for (const identifier of file.removedIdentifiers || []) {
+        if (!isMeaningfulIdentifier(identifier)) continue
         if (!documentMentions(document, identifier.value)) continue
         const status = identifierStatus[identifierKey(identifier)] || 'unknown'
         const contradicted = status === 'absent' && ['config', 'route'].includes(identifier.kind)

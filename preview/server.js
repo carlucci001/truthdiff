@@ -6,6 +6,11 @@ import { fileURLToPath } from 'node:url'
 
 import { runCheck } from '../src/cli.js'
 import { createDemoGraph } from '../src/demo.js'
+import {
+  isGitHubRepositoryUrl,
+  resolveRemoteDocsPath,
+  withClonedGitHubRepository,
+} from '../src/github-source.js'
 
 const PREVIEW_ROOT = path.dirname(fileURLToPath(import.meta.url))
 const STATIC_FILES = new Map([
@@ -24,12 +29,106 @@ function json(response, status, body) {
 }
 
 async function requestBody(request) {
-  let body = ''
+  const chunks = []
+  let size = 0
   for await (const chunk of request) {
-    body += chunk
-    if (body.length > 32_768) throw new Error('Request body is too large')
+    size += chunk.length
+    if (size > 32_768) {
+      const error = new Error('Request body is too large')
+      error.code = 'BODY_TOO_LARGE'
+      throw error
+    }
+    chunks.push(chunk)
   }
-  return JSON.parse(body || '{}')
+  return JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}')
+}
+
+function comparisonFor(input, remote = false) {
+  const requestedRange = String(input.range || (remote ? 'last-commit' : 'working'))
+  if (remote) {
+    if (!['working', 'last-commit', 'HEAD~1..HEAD'].includes(requestedRange)) {
+      throw new Error('GitHub scans currently compare only the prior commit with HEAD.')
+    }
+    return { range: 'last-commit', base: 'HEAD~1', head: 'HEAD' }
+  }
+  const comparisons = {
+    working: { range: 'working', base: 'HEAD', head: null },
+    'last-commit': { range: 'last-commit', base: 'HEAD~1', head: 'HEAD' },
+    'HEAD~1..HEAD': { range: 'HEAD~1..HEAD', base: 'HEAD~1', head: 'HEAD' },
+    'main..HEAD': { range: 'main..HEAD', base: 'main', head: 'HEAD' },
+  }
+  const comparison = comparisons[requestedRange]
+  if (!comparison) {
+    throw new Error('Comparison must be working, last-commit, HEAD~1..HEAD, or main..HEAD.')
+  }
+  return comparison
+}
+
+function trustedLocalRequest(request) {
+  const host = String(request.headers.host || '')
+  let target
+  try {
+    target = new URL(`http://${host}`)
+  } catch {
+    return false
+  }
+  if (!['127.0.0.1', 'localhost'].includes(target.hostname.toLowerCase())) return false
+
+  const origin = request.headers.origin
+  if (!origin) return true
+  try {
+    const parsedOrigin = new URL(origin)
+    return parsedOrigin.protocol === 'http:' && parsedOrigin.host.toLowerCase() === target.host.toLowerCase()
+  } catch {
+    return false
+  }
+}
+
+async function analyzeInput(input, remoteRunner) {
+  if (!input.repo || !input.docs) {
+    throw new Error('Repository and Markdown paths are required.')
+  }
+
+  if (isGitHubRepositoryUrl(input.repo)) {
+    const comparison = comparisonFor(input, true)
+    return remoteRunner(input.repo, async ({ repoPath, repository }) => {
+      const docsPath = resolveRemoteDocsPath(repoPath, input.docs)
+      const graph = await runCheck({
+        repo: repoPath,
+        docs: docsPath,
+        base: comparison.base,
+        head: comparison.head,
+      })
+      return {
+        ...graph,
+        source: {
+          type: 'github',
+          repositoryUrl: repository.repositoryUrl,
+          owner: repository.owner,
+          repository: repository.repository,
+          docsPath: String(input.docs).trim().replace(/\\/g, '/'),
+          comparison,
+        },
+      }
+    })
+  }
+
+  const comparison = comparisonFor(input)
+  const graph = await runCheck({
+    repo: input.repo,
+    docs: input.docs,
+    base: comparison.base,
+    head: comparison.head,
+  })
+  return {
+    ...graph,
+    source: {
+      type: 'local',
+      repositoryPath: path.resolve(input.repo),
+      docsPath: path.resolve(input.docs),
+      comparison,
+    },
+  }
 }
 
 function previewPort(argv) {
@@ -42,10 +141,20 @@ function previewPort(argv) {
   return parsed
 }
 
-export function createPreviewServer() {
-  const token = crypto.randomBytes(24).toString('base64url')
+export function createPreviewServer(options = {}) {
+  const token = options.token || crypto.randomBytes(24).toString('base64url')
+  const historyLimit = Math.max(1, Math.min(100, Number(options.historyLimit) || 25))
+  const recentRuns = []
+  const recentRunGraphs = new Map()
+  const remoteRunner = options.remoteRunner || withClonedGitHubRepository
+  let remoteScanInProgress = false
+
   return http.createServer(async (request, response) => {
     const url = new URL(request.url, 'http://127.0.0.1')
+
+    if (url.pathname.startsWith('/api/') && !trustedLocalRequest(request)) {
+      return json(response, 403, { error: 'Requests must originate from this local TruthDiff server.' })
+    }
 
     if (request.method === 'GET' && url.pathname === '/api/config') {
       return json(response, 200, { token, localOnly: true })
@@ -61,30 +170,47 @@ export function createPreviewServer() {
       if (request.method === 'GET' && url.pathname === '/api/demo') {
         return json(response, 200, createDemoGraph())
       }
+      if (request.method === 'GET' && url.pathname === '/api/runs') {
+        return json(response, 200, { runs: recentRuns })
+      }
+      const runDetailMatch = request.method === 'GET' && url.pathname.match(/^\/api\/runs\/([0-9a-f-]+)$/i)
+      if (runDetailMatch) {
+        const run = recentRuns.find(item => item.id === runDetailMatch[1])
+        const graph = recentRunGraphs.get(runDetailMatch[1])
+        if (!run || !graph) return json(response, 404, { error: 'Saved scan not found' })
+        return json(response, 200, { run, graph })
+      }
       if (request.method === 'POST' && url.pathname === '/api/analyze') {
         try {
           const input = await requestBody(request)
-          if (!input.repo || !input.docs) {
-            return json(response, 400, {
-              error: 'Repository and Markdown paths are required.',
-            })
+          const remote = isGitHubRepositoryUrl(input.repo)
+          if (remote && remoteScanInProgress) {
+            return json(response, 429, { error: 'A GitHub scan is already running. Try again when it finishes.' })
           }
-          const requestedRange = String(input.range || 'working')
-          const [base, head] =
-            requestedRange === 'last-commit'
-              ? ['HEAD~1', 'HEAD']
-              : requestedRange.includes('..')
-                ? requestedRange.split('..', 2)
-                : ['HEAD', null]
-          const graph = await runCheck({
-            repo: input.repo,
-            docs: input.docs,
-            base,
-            head,
-          })
-          return json(response, 200, graph)
+          if (remote) remoteScanInProgress = true
+          let graph
+          try {
+            graph = await analyzeInput(input, remoteRunner)
+          } finally {
+            if (remote) remoteScanInProgress = false
+          }
+          const run = {
+            id: crypto.randomUUID(),
+            createdAt: new Date().toISOString(),
+            source: graph.source,
+            summary: graph.summary,
+          }
+          recentRuns.unshift(run)
+          recentRunGraphs.set(run.id, graph)
+          while (recentRuns.length > historyLimit) {
+            const removed = recentRuns.pop()
+            if (removed) recentRunGraphs.delete(removed.id)
+          }
+          return json(response, 200, { ...graph, run: { id: run.id, createdAt: run.createdAt } })
         } catch (error) {
-          return json(response, 400, { error: error.message })
+          return json(response, error.code === 'BODY_TOO_LARGE' ? 413 : 400, {
+            error: error.message,
+          })
         }
       }
       return json(response, 404, { error: 'Not found' })
@@ -115,7 +241,7 @@ export function createPreviewServer() {
 
 export async function startPreviewServer(options = {}) {
   const requestedPort = options.port ?? previewPort(process.argv.slice(2))
-  const server = createPreviewServer()
+  const server = createPreviewServer(options)
   await new Promise((resolve, reject) => {
     server.once('error', reject)
     server.listen(requestedPort, '127.0.0.1', resolve)

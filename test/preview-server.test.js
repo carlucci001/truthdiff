@@ -15,7 +15,7 @@ test('preview server is loopback-only and protects analysis endpoints', async ()
     const demo = await fetch(`${url}/api/demo`, {
       headers: { 'X-TruthDiff-Token': config.token },
     }).then(response => response.json())
-    assert.equal(demo.summary.counts.contradicted, 1)
+    assert.equal(demo.summary.counts.contradicted, 3)
   } finally {
     await new Promise(resolve => server.close(resolve))
   }

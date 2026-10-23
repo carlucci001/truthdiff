@@ -1,0 +1,150 @@
+- generic [active] [ref=e1]:
+  - link "Skip to scan setup" [ref=e2] [cursor=pointer]:
+    - /url: "#setup"
+  - main [ref=e3]:
+    - generic [ref=e4]:
+      - link "TruthDiff home" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e10]:
+          - strong [ref=e11]: TruthDiff
+          - generic [ref=e12]: Documentation change checks
+      - generic "Preview status" [ref=e13]: PREVIEW RUNNING
+    - region [ref=e16]:
+      - generic [ref=e17]:
+        - paragraph [ref=e18]: CODE CHANGES, CHECKED AGAINST YOUR DOCS
+        - heading "Find documentation that no longer matches the code." [level=1] [ref=e19]
+        - paragraph [ref=e20]: Choose a Git source and tell TruthDiff where its Markdown documentation lives. It reads the code change, checks the related docs, and shows the evidence behind anything that needs attention.
+      - list "How TruthDiff works" [ref=e21]:
+        - listitem [ref=e22]:
+          - strong [ref=e23]: "1"
+          - generic [ref=e24]:
+            - generic [ref=e25]: Choose code
+            - generic [ref=e26]: Local checkout or public GitHub URL
+        - listitem [ref=e27]:
+          - strong [ref=e28]: "2"
+          - generic [ref=e29]:
+            - generic [ref=e30]: Point to docs
+            - generic [ref=e31]: A folder of Markdown files
+        - listitem [ref=e32]:
+          - strong [ref=e33]: "3"
+          - generic [ref=e34]:
+            - generic [ref=e35]: Review the verdict
+            - generic [ref=e36]: Proof in red, review signals in amber
+    - generic [ref=e37]:
+      - region [ref=e38]:
+        - generic [ref=e39]:
+          - generic [ref=e40]:
+            - generic [ref=e41]: "01"
+            - generic [ref=e42]:
+              - heading "Set up a scan" [level=2] [ref=e43]
+              - paragraph [ref=e44]: TruthDiff compares a Git change with documentation. It does not compare two folders.
+          - button "View example result" [disabled] [ref=e45]
+        - generic [ref=e46]:
+          - group "Where is the code?" [ref=e47]:
+            - generic [ref=e49]:
+              - generic [ref=e50]:
+                - radio "Local checkout A Git repository on this computer" [checked] [disabled] [ref=e51]
+                - generic [ref=e52]:
+                  - generic [ref=e53]: Local checkout
+                  - generic [ref=e54]: A Git repository on this computer
+              - generic [ref=e55]:
+                - radio "Public GitHub URL A public repository TruthDiff can read" [disabled] [ref=e56]
+                - generic [ref=e57]:
+                  - generic [ref=e58]: Public GitHub URL
+                  - generic [ref=e59]: A public repository TruthDiff can read
+          - generic [ref=e60]:
+            - generic [ref=e61]:
+              - generic [ref=e62]: Local Git repository
+              - textbox "Local Git repository" [disabled] [ref=e63]:
+                - /placeholder: C:\dev\your-project
+              - generic [ref=e64]: Use the full path to a checked-out Git repository.
+            - generic [ref=e65]:
+              - generic [ref=e66]: Markdown documentation folder
+              - textbox "Markdown documentation folder" [disabled] [ref=e67]:
+                - /placeholder: C:\dev\your-project\docs
+              - generic [ref=e68]: Use the full path to the folder containing .md files.
+            - generic [ref=e69]:
+              - generic [ref=e70]: Which code change?
+              - combobox "Which code change?" [disabled] [ref=e71] [cursor=pointer]:
+                - option "Uncommitted work" [selected]
+                - option "Most recent commit"
+                - option "Current branch since main"
+              - generic [ref=e72]: Checks local edits that have not been committed yet.
+            - button "Checking…" [disabled] [ref=e73]:
+              - generic [aria-hidden] [ref=e75]: →
+          - status [ref=e76]: Loading the built-in example…
+      - complementary [ref=e77]:
+        - generic [ref=e78]:
+          - generic [ref=e79]:
+            - generic [ref=e80]: HISTORY
+            - heading "Recent scans" [level=2] [ref=e81]
+          - button "Refresh recent scans" [disabled] [ref=e82]: ↻
+        - status [ref=e83]: No saved scans yet. Completed scans will appear here when history is available.
+    - region [ref=e84]:
+      - generic [ref=e86]:
+        - generic [ref=e87]: "02"
+        - generic [ref=e88]:
+          - heading "Scan result" [level=2] [ref=e89]
+          - paragraph [ref=e90]: Built-in example
+      - generic [ref=e91]:
+        - generic [aria-hidden] [ref=e92]: —
+        - generic [ref=e93]:
+          - paragraph [ref=e94]: READY
+          - heading "Run a scan to check your documentation." [level=3] [ref=e95]
+          - paragraph [ref=e96]: TruthDiff will explain whether it found proof of a mismatch or only something worth reviewing.
+      - generic "How to read results" [ref=e97]:
+        - article [ref=e98]:
+          - generic [aria-hidden] [ref=e99]: "!"
+          - generic [ref=e100]:
+            - strong [ref=e101]: Red means proven mismatch
+            - paragraph [ref=e102]: Deterministic evidence shows the documentation contradicts the changed code.
+        - article [ref=e103]:
+          - generic [aria-hidden] [ref=e104]: "?"
+          - generic [ref=e105]:
+            - strong [ref=e106]: Amber means review suggested
+            - paragraph [ref=e107]: The code and document appear related, but TruthDiff does not claim the doc is wrong.
+      - region "Scan counts" [ref=e108]:
+        - article [ref=e109]:
+          - generic [ref=e110]: Changed files
+          - strong [ref=e111]: —
+        - article [ref=e112]:
+          - generic [ref=e113]: Proven mismatches
+          - strong [ref=e114]: —
+        - article [ref=e115]:
+          - generic [ref=e116]: Suggested reviews
+          - strong [ref=e117]: —
+        - article [ref=e118]:
+          - generic [ref=e119]: Affected docs
+          - strong [ref=e120]: —
+      - generic [ref=e121]:
+        - region [ref=e122]:
+          - generic [ref=e124]:
+            - generic [ref=e125]: FINDINGS
+            - heading "Documents to inspect 0" [level=3] [ref=e126]
+          - generic [ref=e127]:
+            - strong [ref=e128]: No findings to show
+            - paragraph [ref=e129]: Run a scan or open an example result.
+        - complementary [ref=e130]:
+          - generic [ref=e132]:
+            - generic [ref=e133]: EVIDENCE
+            - heading "Why it was flagged" [level=3] [ref=e134]
+          - generic [ref=e135]:
+            - strong [ref=e136]: Select a finding
+            - paragraph [ref=e137]: Choose a document to see the code connection and evidence.
+      - group [ref=e138]:
+        - generic "Impact map Optional visual of changed files connected to documents" [ref=e139] [cursor=pointer]:
+          - generic [ref=e140]:
+            - strong [ref=e141]: Impact map
+            - generic [ref=e142]: Optional visual of changed files connected to documents
+          - generic [aria-hidden] [ref=e143]: ⌄
+        - generic [ref=e144]:
+          - generic "Impact map legend" [ref=e146]:
+            - generic [ref=e147]: Changed source
+            - generic [ref=e149]: Proven mismatch
+            - generic [ref=e151]: Suggested review
+          - generic [ref=e153]:
+            - generic "Impact map. Use the findings list above for keyboard navigation." [ref=e154] [cursor=pointer]
+            - button "Select a document to annotate" [disabled] [ref=e155] [cursor=pointer]
+    - generic [ref=e156]:
+      - generic [ref=e157]: TRUTHDIFF / MVP PREVIEW
+      - generic [ref=e158]: Local mode reads local files. GitHub mode accepts public repositories.

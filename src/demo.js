@@ -34,6 +34,22 @@ export function createDemoGraph() {
         addedIdentifiers: [],
         removedIdentifiers: [],
       },
+      {
+        path: 'src/reporting.js',
+        previousPath: 'src/reporting.js',
+        addedLines: ["export const reports = '/api/v2/reports'"],
+        removedLines: ["export const reports = '/api/v1/reports'"],
+        addedIdentifiers: [{ kind: 'route', value: '/api/v2/reports' }],
+        removedIdentifiers: [{ kind: 'route', value: '/api/v1/reports' }],
+      },
+      {
+        path: 'src/webhooks.js',
+        previousPath: 'src/webhooks.js',
+        addedLines: ['export function enqueueWebhook() {}'],
+        removedLines: ['export function dispatchLegacyWebhook() {}'],
+        addedIdentifiers: [{ kind: 'symbol', value: 'enqueueWebhook' }],
+        removedIdentifiers: [{ kind: 'symbol', value: 'dispatchLegacyWebhook' }],
+      },
     ],
   }
 
@@ -63,6 +79,30 @@ export function createDemoGraph() {
       sourceColor: '#34d399',
     }),
     normalizeDocument({
+      id: 'docs/client-migration.md',
+      title: 'Client migration checklist',
+      content: '# Client migration\n\nConfirm `/api/retired` before moving customer traffic.',
+      sourceRoot: 'operations',
+      sourceName: 'Operations',
+      sourceColor: '#a78bfa',
+    }),
+    normalizeDocument({
+      id: 'docs/reporting-api.md',
+      title: 'Reporting API',
+      content: '# Reporting API\n\nRequest exports from `/api/v1/reports`.',
+      sourceRoot: 'engineering',
+      sourceName: 'Engineering',
+      sourceColor: '#38bdf8',
+    }),
+    normalizeDocument({
+      id: 'docs/integration-webhooks.md',
+      title: 'Integration webhooks',
+      content: '# Webhooks\n\nCall `dispatchLegacyWebhook` for partner events.',
+      sourceRoot: 'engineering',
+      sourceName: 'Engineering',
+      sourceColor: '#38bdf8',
+    }),
+    normalizeDocument({
       id: 'docs/brand-guide.md',
       title: 'Brand guide',
       content: '# Brand\n\nUse the primary blue for product marks.',
@@ -77,6 +117,7 @@ export function createDemoGraph() {
     documents,
     identifierStatus: {
       [identifierKey({ kind: 'route', value: '/api/retired' })]: 'absent',
+      [identifierKey({ kind: 'route', value: '/api/v1/reports' })]: 'absent',
     },
     semanticCandidates: [{
       sourceId: 'src/session-policy.js',
